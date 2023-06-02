@@ -18,7 +18,6 @@ def xss_test(url, value, parameter, payload):
         response = requests.get(target, headers=headers)
         response.raise_for_status()
     except requests.exceptions.RequestException as e:
-        print(f"[red][✖] [white bold]{e}")
         return
 
     print(f"[blue ][~][green bold] testing [yellow]\"{parameter}\"[white]: {target}")
