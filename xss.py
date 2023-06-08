@@ -1,6 +1,7 @@
+#!/usr/bin/env python3
+import sys
 import requests
 import argparse
-import concurrent.futures
 from rich import print
 
 tested_parameters = set()
@@ -47,18 +48,22 @@ def main():
     parser = argparse.ArgumentParser(description='Finds low hanging fruit XSS 😱')
     parser.add_argument('-w', '--wordlist', type=str, help='Path to the URLs wordlist.')
     parser.add_argument('-s', '--silent', action='store_true', help="Won't print the banner.")
-    parser.add_argument('-t', '--threads', type=int, default=10, help='Number of threads to use. Default: 10')
     parser.add_argument('-p', '--payload', type=str, default='<img src="x">', help='Payload to use. Default: <img src="x">')
     args = parser.parse_args()
 
     if not args.silent:
         print("\n[white] Coded by [blue bold]ryuku 🥷\n")
 
-    with open(args.wordlist, 'r') as f:
-        urls = f.readlines()
+    urls = []
+    if not sys.stdin.isatty():
+        # Read URLs from stdin
+        urls = sys.stdin.read().splitlines()
+    elif args.wordlist:
+        with open(args.wordlist, 'r') as f:
+            urls = f.readlines()
 
-    with concurrent.futures.ThreadPoolExecutor(max_workers=args.threads) as executor:
-        executor.map(process_url, urls, [args.payload] * len(urls))
+    for url in urls:
+        process_url(url, args.payload)
 
     if vulnerable_urls:
         print("\n[red bold]Findings:")
